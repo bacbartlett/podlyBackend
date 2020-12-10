@@ -2,12 +2,10 @@ const express = require("express")
 const {hashPassword, createCookie, generateNewToken} = require("../identifyUser")
 const {checkHashedPassword} = require("../identifyUser")
 
-const podcastRouter = require("./podcasts")
-const {Podcaster} = require("../db/models")
+const {Researcher} = require("../db/models")
 
 const router = express.Router()
 
-router.use("/podcasts", podcastRouter)
 
 router.get("/token", (req, res)=>{
     console.log(req.user)
@@ -28,8 +26,8 @@ router.post("/signUp", async (req, res, next) =>{
     const {email, password, firstName, lastName} = req.body
     console.log(password)
     console.log(hashPassword(password))
-    const newPodcaster = await Podcaster.create({email, firstName, lastName, hashedPassword: hashPassword(password)});
-    const token = await generateNewToken(newPodcaster.id, "Podcaster")
+    const newPodcaster = await Researcher.create({email, firstName, lastName, hashedPassword: hashPassword(password)});
+    const token = await generateNewToken(newPodcaster.id, "Researcher")
     res.json({id: newPodcaster.id, email: newPodcaster.email, token})
     return
 })
@@ -40,12 +38,12 @@ router.post("/login", async(req, res, next) =>{
         return
     }
     const {email, password} = req.body;
-    const user = await Podcaster.findOne({where: {email}})
+    const user = await Researcher.findOne({where: {email}})
     if(!user || !checkHashedPassword(password, user.hashedPassword)){
         res.json({msg: "Username or Password is incorrect"})
         return
     }
-    const token = await generateNewToken(user.id, "Podcaster")
+    const token = await generateNewToken(user.id, "Researcher")
     res.json({email: user.email, id: user.id, token})
 })
 
