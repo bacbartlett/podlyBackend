@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Transcript.belongsTo(models.Podcast, {foreignKey: "podcastId"})
       Transcript.belongsTo(models.Transcriber, {foreignKey: "transcriberId"})
+      Transcript.hasMany(models.Speaker, {foreignKey: "transcriptId"})
     }
   };
   Transcript.init({

@@ -6,6 +6,7 @@ const config = require("../config")
 const fetch = require("node-fetch")
 const fs = require("fs")
 const timers = require("timers")
+const {Podcast, Transcript} = require("../db/models")
 //const multer = require("multer")
 
 AWS.config.update({
@@ -129,7 +130,7 @@ router.post("/new", async(req, res, next)=>{
     const feed = await parser.parseURL(rssFeedUrl)
     const title = feed.title
     const nPodcast = await Podcast.create({podcasterId: req.user.id, name: title, rssFeedUrl})
-    const podcasts = await Podcast.findAll({where:{userId: req.user.id}})
+    const podcasts = await Podcast.findAll({where:{podcasterId: req.user.id}})
     res.json(podcasts)
 })
 
@@ -138,20 +139,39 @@ router.get("/myPodcasts", async(req, res, next)=>{
         res.json({msg: "Please log in"})
         return
     }
-    const podcasts = await Podcast.findAll({where:{userId: req.user.id}})
+    const podcasts = await Podcast.findAll({where:{podcasterId: req.user.id}})
     res.json(podcasts)
     return
 })
 
+
+//check that it is their podcast
 router.get("/:podcastId", async (req, res) =>{
-    const feed = await parser.parseURL("https://rss.art19.com/merriam-websters-word-of-the-day")
+    if(!req.user){
+        res.json({msg: "Please Log In"})
+        return
+    }
+    const podcast = await Podcast.findByPk(req.params.podcastId)
+    const feed = await parser.parseURL(podcast.rssFeedUrl)
     const data = {}
     data.image = feed.image.url
     data.title = feed.title
     data.description = feed.description
     data.items = []
     for(let i = 0; i < 20; i++){
-        data.items.push(feed.items[i])
+        const item = feed.items[i]
+        const transcript = await Transcript.findOne({where:{podcastId: req.params.podcastId, link: item.link}})
+        if(transcript){
+            if(transcript.status){
+                item.status = true
+                item.transcriptId = transcript.id
+            } else{
+                item.status = true
+            }
+        } else{
+            item.status = false
+        }
+        data.items.push(item)
     }
     res.json(data)
 })
