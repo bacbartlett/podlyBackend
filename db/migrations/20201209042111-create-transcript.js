@@ -22,12 +22,12 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       transcriberId: {
-        allowNull:false,
+        allowNull:true,
         references:{model: "Transcribers"},
         type: Sequelize.INTEGER
       },
       dynamoUrl: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.STRING(200)
       },
       createdAt: {

@@ -38,7 +38,7 @@ class Transcript{
     }
 
     constructFromAWSJson(json){
-        const obj = JSON.parse(json)
+        const obj = json
         const result = []
         for(let i = 0; i < obj.results.speaker_labels.segments.length; i++){
             const speakerName = obj.results.speaker_labels.segments[i].speaker_label
@@ -54,6 +54,10 @@ class Transcript{
             }
         }
         this.info = result
+    }
+
+    getJson(){
+        return JSON.stringify(this.info)
     }
 }
 

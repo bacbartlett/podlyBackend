@@ -6,7 +6,8 @@ const config = require("../config")
 const fetch = require("node-fetch")
 const fs = require("fs")
 const timers = require("timers")
-const {Podcast, Transcript} = require("../db/models")
+const {Podcast, Transcript, Speaker} = require("../db/models")
+const {Transcript: TranscriptClass} = require("../diffing/Classes")
 //const multer = require("multer")
 
 AWS.config.update({
@@ -20,13 +21,52 @@ const Transcribe = new AWS.TranscribeService()
 
 const router = express.Router()
 
-const checkIfDone = async (t) => {
+
+const readyForEditor = async (id) =>{
+    const transcript = await Transcript.findByPk(id)
+    if(!transcript.dynamoUrl){
+        console.log("No url")
+    }
+    const dynamoUrl = transcript.dynamoUrl 
+    const Key = dynamoUrl.split("/").pop()
+    console.log(Key)
+    const json = await s3.getObject({
+        Bucket: "wisjson",
+        Key
+    }).promise()
+    console.log("First download completed")
+    const data = JSON.parse(json.Body)
+    const t = new TranscriptClass()
+    t.constructFromAWSJson(data)
+    const buff = Buffer.from(t.getJson())
+    const uploadKey = "custom" + Date.now().toString() + ".json"
+    const params = {
+        Body: buff,
+        Bucket: "wisjson",
+        Key: uploadKey
+    }
+    const res = await s3.putObject(params).promise()
+    console.log(res)
+    const temp = transcript.dynamoUrl.split("/")
+    temp.pop()
+    temp.push(uploadKey)
+    transcript.dynamoUrl = temp.join("/")
+    transcript.status = 2;
+    transcript.save()
+}
+
+const checkIfDone = async (t, podcastInfo) => {
     console.log("here is my arg: ", t)
     console.log("Checking status")
     const status = await Transcribe.getTranscriptionJob({TranscriptionJobName: t.t.TranscriptionJob.TranscriptionJobName}).promise()
     console.log(status)
     if(status.TranscriptionJob.TranscriptionJobStatus === "COMPLETED"){
         console.log("Done! Do next thing")
+        const transcript = await Transcript.findByPk(t.podcastInfo.transcriptId)
+        transcript.status = 2
+        transcript.dynamoUrl = status.TranscriptionJob.Transcript.TranscriptFileUri
+        await transcript.save()
+        readyForEditor(transcript.id)
     } else{
         console.log("not done yet")
         timers.setTimeout(checkIfDone, 60000, t)
@@ -80,13 +120,23 @@ router.post("/:podcastId/newjob", async (req, res) =>{
         res.json({msg:"Please Login"})
         return
     }
-    const mediaUrl = req.body.mediaUrl
+    const {mediaUrl, speakerNames} = req.body
+    const podcastInfo = {mediaUrl, podcastId: req.params.podcastId, speakerNames}
+    
+    const transcript = await Transcript.create({status: 1, link: mediaUrl, podcastId: req.params.podcastId})
+    for(let i = 0; i < speakerNames.length; i++){
+        const speaker = await Speaker.create({transcriptId: transcript.id, name: speakerNames[i]})
+    }
+    console.log("This is the mediaurl:", mediaUrl, "and this is the body:", req.body)
+    podcastInfo.transcriptId = transcript.id
     res.json({msg: "starting"})
+    
     console.log("Starting")
     const resp = await fetch(mediaUrl)
     console.log("Finished first fetch")
     const buff = await resp.buffer()
     console.log("Got the buffer")
+    
     const uploadOptions = {
         Bucket: "wisproject",
         ACL: "bucket-owner-full-control",
@@ -98,6 +148,7 @@ router.post("/:podcastId/newjob", async (req, res) =>{
     const upload = await s3.upload(uploadOptions).promise()
     console.log(upload.Location)
     console.log(upload)
+    
     const transcriptionOptions ={
         Media:{
             MediaFileUri: upload.Location
@@ -110,14 +161,13 @@ router.post("/:podcastId/newjob", async (req, res) =>{
             ShowSpeakerLabels: true,
             ShowAlternatives: true,
             MaxAlternatives: 4,
-            MaxSpeakerLabels: 5,
+            MaxSpeakerLabels: podcastInfo.speakerNames.length + 1
         }
     }
     console.log("About to start")
     const t = await Transcribe.startTranscriptionJob(transcriptionOptions).promise()
     console.log("started")
     console.log(t)
-    const podcastInfo = req.body.pdocastInfo
     checkIfDone({t, podcastInfo})
 })
 
@@ -160,13 +210,14 @@ router.get("/:podcastId", async (req, res) =>{
     data.items = []
     for(let i = 0; i < 20; i++){
         const item = feed.items[i]
-        const transcript = await Transcript.findOne({where:{podcastId: req.params.podcastId, link: item.link}})
+        const transcript = await Transcript.findOne({where:{podcastId: req.params.podcastId, link: item.enclosure.url}})
         if(transcript){
-            if(transcript.status){
+            if(transcript.status === 3){
                 item.status = true
                 item.transcriptId = transcript.id
             } else{
                 item.status = true
+
             }
         } else{
             item.status = false
