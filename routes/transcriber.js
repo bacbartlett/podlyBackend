@@ -2,9 +2,12 @@ const express = require("express")
 const {hashPassword, createCookie, generateNewToken} = require("../identifyUser")
 const {checkHashedPassword} = require("../identifyUser")
 
-const {Transcriber} = require("../db/models")
+const {Transcriber, Transcript, Podcast} = require("../db/models")
+const transcriptRouter = require("./transcription")
 
 const router = express.Router()
+
+router.use("/transcription", transcriptRouter)
 
 router.get("/token", (req, res)=>{
     console.log(req.user)
@@ -44,6 +47,25 @@ router.post("/login", async(req, res, next) =>{
     }
     const token = await generateNewToken(user.id, "Transcriber")
     res.json({email: user.email, id: user.id, token})
+})
+
+
+router.get("/openprojects", async(req, res, next)=>{
+    if(!req.user){
+        res.json({msg: "Please log in"})
+        return
+    }
+    const openProjects = await Transcript.findAll({where:{status: 2}, include: Podcast})
+    const data = []
+    for(let i = 0; i < openProjects.length; i++){
+        const result = {
+            title: "temp title",
+            id: openProjects[i].id,
+            podcastName: openProjects[i].Podcast.name
+        }
+        data.push(result)
+    }
+    res.json(data)
 })
 
 
