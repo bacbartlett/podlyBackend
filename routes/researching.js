@@ -28,7 +28,7 @@ router.get("/allPodcasts/:pageNumber", async(req,res, next)=>{
             results.push(podcasts[i + (req.params.pageNumber * resultsPerPage)])
         }
     }
-    res.json({results, totalPages: Math.ceil(transcripts.length / resultsPerPage)})
+    res.json({results, totalPages: Math.ceil(podcasts.length / resultsPerPage)})
 })
 
 router.get("/allNotes", async(req,res,next)=>{

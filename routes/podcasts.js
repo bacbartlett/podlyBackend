@@ -6,7 +6,7 @@ const config = require("../config")
 const fetch = require("node-fetch")
 const fs = require("fs")
 const timers = require("timers")
-const {Podcast, Transcript, Speaker} = require("../db/models")
+const {Podcast, Transcript, Speaker, Podcaster} = require("../db/models")
 const {Transcript: TranscriptClass} = require("../diffing/Classes")
 //const multer = require("multer")
 
@@ -190,12 +190,27 @@ router.post("/new", async(req, res, next)=>{
 
 router.get("/myPodcasts", async(req, res, next)=>{
     if(!req.user){
-        res.json({msg: "Please log in"})
+        res.json({msg: "Please Log In"})
         return
     }
-    const podcasts = await Podcast.findAll({where:{podcasterId: req.user.id}})
-    res.json(podcasts)
+    const podcasts = await Podcast.findAll({where:{podcasterId:req.user.id}})
+    res.json({results: podcasts})
     return
+})
+
+router.get("/pendingJobs", async(req,res,next)=>{
+    if(!req.user){
+        res.json({msg: "Please Log In"})
+        return
+    }
+    const transcripts = Transcript.findAll({where: {status: 3}, include: {model: Podcast, include:{model:Podcaster}}})
+    const result = []
+    for(let i = 0; i < transcripts.length; i++){
+        if(transcripts[i].Podcast.Podcaster.id === req.user.id){
+            result.push(transcripts[i])
+        }
+    }
+    res.json({results})
 })
 
 
@@ -211,25 +226,35 @@ router.get("/:podcastId", async (req, res) =>{
     data.image = feed.image.url
     data.title = feed.title
     data.description = feed.description
-    data.items = []
+    const items = []
     for(let i = 0; i < 20; i++){
         const item = feed.items[i]
-        const transcript = await Transcript.findOne({where:{podcastId: req.params.podcastId, link: item.enclosure.url}})
-        if(transcript){
-            if(transcript.status === 3){
-                item.status = true
-                item.transcriptId = transcript.id
-            } else{
-                item.status = true
-
-            }
-        } else{
-            item.status = false
+        const transcript = await Transcript.findOne({where:{podcastId: req.params.podcastId, title: item.title}, include:{model: Speaker}})
+        console.log(transcript)
+        const episode = {
+            title: item.title,
+            image: feed.image.url,
+            podcastTitle: data.title,
+            duration: item.itunes.duration,
+            mediaUrl: item.enclosure.url
         }
-        data.items.push(item)
+        if(!transcript){
+            episode.status = 0
+            episode.Speakers = []
+        }
+        if(transcript){
+            episode.id = transcript.id
+            episode.status = transcript.status,
+            episode.Speakers = transcript.Speakers
+        }
+        
+
+        items.push(episode)
     }
-    res.json(data)
+    res.json(items)
 })
+
+
 
 
 

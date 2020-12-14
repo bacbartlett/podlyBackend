@@ -2,7 +2,7 @@ const express = require("express")
 const {hashPassword, createCookie, generateNewToken} = require("../identifyUser")
 const {checkHashedPassword} = require("../identifyUser")
 
-const {Transcriber, Transcript, Podcast} = require("../db/models")
+const {Transcriber, Transcript, Podcast, Speaker} = require("../db/models")
 const transcriptRouter = require("./transcription")
 
 const router = express.Router()
@@ -55,11 +55,14 @@ router.get("/openprojects", async(req, res, next)=>{
         res.json({msg: "Please log in"})
         return
     }
-    const openProjects = await Transcript.findAll({where:{status: 2}, include: Podcast})
+    const openProjects = await Transcript.findAll({where:{status: 2}, include: [{model:Podcast}, {model:Speaker}] })
     const data = []
     for(let i = 0; i < openProjects.length; i++){
         const result = {
             title: openProjects[i].title,
+            image: openProjects[i].Podcast.photoUrl,
+            podcastTitle: openProjects[i].Podcast.name,
+            Speakers: openProjects[i].Speakers,
             id: openProjects[i].id,
             podcastName: openProjects[i].Podcast.name
         }
