@@ -13,7 +13,7 @@ class Word{
     }
 
     makePlain(word){
-        const grammar = `~!@#$%^&*()_-+='";:/?.,`.split("")
+        const grammar = `~!@#$%^&*()_-+='";:/?., `.split("")
         const wordArr = word.toLowerCase().split("")
         const result = []
         for(let i = 0; i < wordArr.length; i++){
@@ -25,8 +25,6 @@ class Word{
     }
 }
 
-const w = new Word(1,2,"Hell!!!oWorlds!!!!???//////Andtheotherstuffs...,asdf")
-console.log(w.plain)
 
 class Transcript{
     constructor(formattedJson){

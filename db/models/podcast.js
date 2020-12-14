@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   };
   Podcast.init({
     podcasterId: DataTypes.INTEGER,
+    photoUrl: DataTypes.STRING,
     name: DataTypes.STRING,
     genreId: DataTypes.INTEGER,
     rssFeedUrl: DataTypes.STRING,

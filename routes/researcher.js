@@ -3,9 +3,11 @@ const {hashPassword, createCookie, generateNewToken} = require("../identifyUser"
 const {checkHashedPassword} = require("../identifyUser")
 
 const {Researcher} = require("../db/models")
+const researchingRouter = require("./researching")
 
 const router = express.Router()
 
+router.use("/researching", researchingRouter)
 
 router.get("/token", (req, res)=>{
     console.log(req.user)

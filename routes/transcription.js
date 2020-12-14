@@ -1,6 +1,8 @@
 const express = require("express")
 const AWS = require("aws-sdk")
 const config = require("../config")
+const {Differ} = require("../diffing")
+const {Word} = require("../diffing/Classes")
 
 AWS.config.update({
     secretAccessKey: config.awsConfig.secretKey,
@@ -22,16 +24,65 @@ router.get("/:transcriptId", async(req, res, next) =>{
         res.json({msg: "Please log in"})
         return
     }
+    console.log("I am looking for:", req.params.transcriptId)
     const transcript = await Transcript.findOne({where: {id: req.params.transcriptId}, include: Speaker})
     const mediaUrl = transcript.dynamoUrl
     const Key = mediaUrl.split("/").pop()
+    console.log("I AM FIRST KEY!!!!!!!!!!!!!!!", Key)
     const json = await s3.getObject({
         Bucket: "wisjson",
         Key
     }).promise()
     const data = JSON.parse(json.Body)
 
+    console.log(JSON.parse(json.Body).length)
+
     res.json({data, transcript})
+})
+
+router.post("/:transcriptionId", async(req, res, next)=>{
+    if(!req.user){
+        res.json({msg: "Please log in"})
+        return
+    }
+    const {data} = req.body
+    console.log(data.length)
+    const transcript = await Transcript.findOne({where: {id: req.params.transcriptionId}, include: Speaker})
+    const Key = transcript.dynamoUrl.split("/").pop()
+    const Bucket = "wisjson"
+    const prom = await s3.getObject({
+        Bucket,
+        Key
+    }).promise()
+
+    const properData = []
+    for(let i = 0; i < data.length; i++){
+        const currentWord = data[i]
+        properData.push(new Word(currentWord.startTime, currentWord.endTime, currentWord.formatted, currentWord.speaker))
+    }
+    console.log(JSON.parse(prom.Body).length, properData.length)
+    const d = new Differ(JSON.parse(prom.Body), properData)
+
+    const buff = Buffer.from(JSON.stringify(d.result))
+    const uploadKey = "transcribed" + Date.now().toString() + ".json"
+    const params = {
+        Body: buff,
+        Bucket: "wisjson",
+        Key: uploadKey
+    }
+    const res1 = await s3.putObject(params).promise()
+    console.log(res1)
+    const temp = transcript.dynamoUrl.split("/")
+    temp.pop()
+    temp.push(uploadKey)
+    transcript.dynamoUrl = temp.join("/")
+    transcript.status = 3;
+    transcript.save()
+
+    res.json({msg: "Success"})
+
+    // console.log(d.result)
+
 })
 
 

@@ -2,7 +2,7 @@ const {Word, Transcript} = require("./Classes")
 
 class Differ{
     constructor(oldArr, newArr){
-        this.searchBuffer = 11
+        this.searchBuffer = 100
         this.simMarker = 4
 
         this.oldArr = oldArr;
@@ -25,7 +25,7 @@ class Differ{
                 console.log(this.oldArr[this.currentOld].plain, this.newArr[this.currentNew].plain)
             }
             if(this.oldArr[this.currentOld].plain === this.newArr[this.currentNew].plain){
-                const w = new Word(this.oldArr[this.currentOld].startTime, this.oldArr[this.currentOld].endTime, this.newArr[this.currentNew].formatted, this.oldArr[this.currentOld].speaker)
+                const w = new Word(this.oldArr[this.currentOld].startTime, this.oldArr[this.currentOld].endTime, this.newArr[this.currentNew].formatted, this.newArr[this.currentOld].speaker)
                 this.result.push(w)
                 this.completedNew = this.currentNew;
                 this.completedOld = this.currentOld;
@@ -37,6 +37,7 @@ class Differ{
             //if not the same
             this.findTheNextSame()
         }
+        this.addBackTimeStamps()
     }
 
     findTheNextSame(){
@@ -53,17 +54,47 @@ class Differ{
                     return
                 }  
             }else{
-                console.log(this.newArr[this.currentNew + matched], this.oldArr[searchIndex].plain)
-                console.log("resetting")
+                console.log(this.newArr[this.currentNew + matched].plain, this.oldArr[searchIndex].plain)
+                // console.log("resetting")
                 matched = 0
             }
             searchIndex++
         }
         //this new word does not appear in old
-        this.result.push(new Word(undefined, undefined, this.newArr[this.currentNew].plain, this.newArr[this.currentNew].speaker))
+        this.result.push(new Word(undefined, undefined, this.newArr[this.currentNew].formatted, this.newArr[this.currentNew].speaker))
         this.completedNew = this.currentNew
         this.currentNew++
     }
+
+    addBackTimeStamps(){
+        console.log("rinning add back time stamps")
+        for(let i = 0; i < this.result.length; i++){
+            const currentWord = this.result[i]
+            if(currentWord.startTime){
+                continue
+            }
+            //console.log("Found one:", this.result[i])
+            let counter = 1
+            let j = i + 1;
+            while(!this.result[j].startTime && j < this.result.length){
+                counter++
+                j++
+            }
+            let dividedTime;
+            if(j === this.result.length){
+                dividedTime = .3
+            } else{
+                console.log(this.result[j].startTime, this.result[i - 1].endTime, counter, (this.result[j].startTime - this.result[i - 1].endTime) / (counter) )
+                dividedTime = (this.result[j].startTime - this.result[i - 1].endTime) / (counter)
+            }
+            for(let k = 0; k < counter; k++){
+                this.result[i + k - 1].startTime = this.result[i - 1].endTime + (k * counter)
+                this.result[i + k - 1].endTime = this.result[i - 1].endTime + ((k + 1) * counter)
+                console.log(this.result[i + k - 1])
+            }
+            //console.log("done for this one:", this.result[i])
+        }
+    }
 }
 
-module.exports = Differ
+module.exports = {Differ}

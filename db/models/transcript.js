@@ -17,6 +17,8 @@ module.exports = (sequelize, DataTypes) => {
   };
   Transcript.init({
     status: DataTypes.INTEGER,
+    title: DataTypes.STRING,
+    length: DataTypes.INTEGER,
     link: DataTypes.STRING,
     podcastId: DataTypes.INTEGER,
     transcriberId: DataTypes.INTEGER,

@@ -59,7 +59,7 @@ router.get("/openprojects", async(req, res, next)=>{
     const data = []
     for(let i = 0; i < openProjects.length; i++){
         const result = {
-            title: "temp title",
+            title: openProjects[i].title,
             id: openProjects[i].id,
             podcastName: openProjects[i].Podcast.name
         }

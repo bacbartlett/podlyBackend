@@ -13,6 +13,10 @@ module.exports = {
         references:{model: "Podcasters"},
         type: Sequelize.INTEGER
       },
+      photoUrl:{
+        allowNull: false,
+        type: Sequelize.STRING(400)
+      },
       name: {
         allowNull:false,
         type: Sequelize.STRING(200)
@@ -21,7 +25,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       rssFeedUrl: {
-        type: Sequelize.STRING(200)
+        type: Sequelize.STRING(400)
       },
       dynamoUrl: {
         type: Sequelize.STRING(200)

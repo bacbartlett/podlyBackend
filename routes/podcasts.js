@@ -120,10 +120,10 @@ router.post("/:podcastId/newjob", async (req, res) =>{
         res.json({msg:"Please Login"})
         return
     }
-    const {mediaUrl, speakerNames} = req.body
+    const {mediaUrl, speakerNames, title} = req.body
     const podcastInfo = {mediaUrl, podcastId: req.params.podcastId, speakerNames}
     
-    const transcript = await Transcript.create({status: 1, link: mediaUrl, podcastId: req.params.podcastId})
+    const transcript = await Transcript.create({status: 1, link: mediaUrl, podcastId: req.params.podcastId, title: title})
     for(let i = 0; i < speakerNames.length; i++){
         const speaker = await Speaker.create({transcriptId: transcript.id, name: speakerNames[i]})
     }
@@ -139,7 +139,7 @@ router.post("/:podcastId/newjob", async (req, res) =>{
     
     const uploadOptions = {
         Bucket: "wisproject",
-        ACL: "bucket-owner-full-control",
+        ACL: "public-read",
         Key: Date.now().toString(),
         Body: buff,
         ContentType: "mp3"
@@ -147,6 +147,8 @@ router.post("/:podcastId/newjob", async (req, res) =>{
     console.log("beginning upload")
     const upload = await s3.upload(uploadOptions).promise()
     console.log(upload.Location)
+    transcript.link = upload.Location
+    await transcript.save()
     console.log(upload)
     
     const transcriptionOptions ={
@@ -179,7 +181,9 @@ router.post("/new", async(req, res, next)=>{
     const {rssFeedUrl} = req.body
     const feed = await parser.parseURL(rssFeedUrl)
     const title = feed.title
-    const nPodcast = await Podcast.create({podcasterId: req.user.id, name: title, rssFeedUrl})
+    const photoUrl = feed.image.url
+    console.log(photoUrl)
+    const nPodcast = await Podcast.create({podcasterId: req.user.id, name: title, rssFeedUrl, photoUrl: photoUrl})
     const podcasts = await Podcast.findAll({where:{podcasterId: req.user.id}})
     res.json(podcasts)
 })

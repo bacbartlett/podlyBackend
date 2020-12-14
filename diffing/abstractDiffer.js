@@ -1,22 +1,39 @@
 class Word{
-    constructor(word, time){
-        this.word = word
-        this.time = time
+    constructor(start_time, end_time, formatted, speaker, suggestions){
+        this.startTime = start_time
+        this.endTime = end_time
+        this.formatted = formatted
+        this.suggestions = suggestions
+        this.speaker = speaker
+
+        this.plain = this.makePlain(this.formatted)
+    }
+
+    makePlain(word){
+        const grammar = `~!@#$%^&*()_-+='";:/?.,`.split("")
+        const wordArr = word.toLowerCase().split("")
+        const result = []
+        for(let i = 0; i < wordArr.length; i++){
+            if(!grammar.includes(wordArr[i])){
+                result.push(wordArr[i])
+            }
+        }
+        return result.join("")
     }
 }
 
-const composeOldString = (str) =>{
-    result = []
-    words = str.split(" ")
-    for(let i = 0; i < words.length; i++){
-        result.push(new Word(words[i], i))
-    }
-    return result
-}
+// const composeOldString = (str) =>{
+//     result = []
+//     words = str.split(" ")
+//     for(let i = 0; i < words.length; i++){
+//         result.push(new Word(words[i], i))
+//     }
+//     return result
+// }
 
-const oldArr = composeOldString("this is the first sentence i am writing and i think it is rather fine dont you")
+// const oldArr = composeOldString("this is the first sentence i am writing and i think it is rather fine dont you")
 
-const newArr = "this is the second sentence i am writing and i think it is rather rough".split(" ")
+// const newArr = "this is the second sentence i am writing and i think it is rather rough".split(" ")
 
 
 
@@ -97,9 +114,9 @@ class Differ{
             //if it is the case that they are the same
             console.log(this.currentOld)
             console.log(this.oldArr[this.currentOld].word, this.newArr[this.currentNew])
-            if(this.oldArr[this.currentOld].word === this.newArr[this.currentNew]){
+            if(this.oldArr[this.currentOld].plain === this.newArr[this.currentNew].plain){
                 console.log("ture")
-                const w = new Word(this.newArr[this.currentNew], this.oldArr[this.currentOld].time)
+                const w = new Word(this.oldArr[this.currentOld].startTime, this.oldArr[this.currentOld].endTime, this.newArr[this.currentNew].formatted, this.oldArr[this.currentOld].speaker)
                 this.result.push(w)
                 this.completedNew = this.currentNew;
                 this.completedOld = this.currentOld;
@@ -118,11 +135,11 @@ class Differ{
         let matched = 0
         while(searchIndex < this.currentOld + this.searchBuffer && searchIndex < this.oldArr.length){
             console.log("Comparing:", this.newArr[this.currentNew],this.oldArr[searchIndex].word)
-            if(this.newArr[this.currentNew + matched] === this.oldArr[searchIndex].word){
+            if(this.newArr[this.currentNew + matched].plain === this.oldArr[searchIndex].plain){
                 matched++
                 console.log(matched)
                 if(matched >= this.simMarker){
-                    const w = new Word(this.newArr[this.currentNew], this.oldArr[searchIndex].time)
+                    const w = new Word(this.oldArr[this.currentOld].startTime, this.oldArr[this.currentOld].endTime, this.newArr[this.currentNew].formatted, this.oldArr[this.currentOld].speaker)
                     this.completedOld++
                     this.currentOld++
                     this.completedNew = this.currentNew
@@ -135,12 +152,10 @@ class Differ{
             searchIndex++
         }
         //this new word does not appear in old
-        this.result.push(new Word(newArr[this.currentNew], undefined))
+        this.result.push(new Word(null, null, this.newArr[this.currentNew].formatted, this.oldArr[this.currentOld].speaker)))
         this.completedNew = this.currentNew
         this.currentNew++
     }
 }
 
-
-const d = new Differ(oldArr, newArr)
-console.log(d.result)
+module.exports = {Differ}
