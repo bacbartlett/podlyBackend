@@ -5,6 +5,7 @@ const cors = require("cors")
 const bearer = require("express-bearer-token")
 const d = require("dotenv").config()
 const {identifyUser} = require("./identifyUser")
+const bearerToken = require("express-bearer-token")
 
 // const addTokenAsCookie = (req, res, next) =>{
 //     console.log(req, req.cookies)
@@ -18,6 +19,7 @@ const {identifyUser} = require("./identifyUser")
 const indexRouter = require("./routes")
 
 const app = express();
+app.use(bearerToken())
 app.use(cookieParser())
 const corsOptions = {origin: ["https://master.d2xwoaxs83rxad.amplifyapp.com", "http://localhost:3000"], credentials: true};
 app.use(cors(corsOptions))

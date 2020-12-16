@@ -7,12 +7,12 @@ const identifyUser = async(req, res, next)=>{
     console.log(req, "This is req")
     console.log(req.headers.cookies, "This is the headers")
     console.log(req.cookies, "THis is just plain cookies")
-    if(!req.cookies){
+    if(!req.token){
         req.user = null;
         next()
         return
     }
-    const token = req.cookies.loginToken;
+    const token = req.token;
     jwt.verify(token, secret, null, async (err, payload) =>{
         if(err || !payload){
             req.user = null
