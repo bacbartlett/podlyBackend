@@ -7,7 +7,7 @@ const d = require("dotenv").config()
 const {identifyUser} = require("./identifyUser")
 
 const addTokenAsCookie = (req, res, next) =>{
-    console.log(req, req.cookie)
+    console.log(req, req.cookies)
     if(req.body.token){
         req.cookies = {loginToken: req.body.token}
     }
