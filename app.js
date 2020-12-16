@@ -6,14 +6,14 @@ const bearer = require("express-bearer-token")
 const d = require("dotenv").config()
 const {identifyUser} = require("./identifyUser")
 
-const addTokenAsCookie = (req, res, next) =>{
-    console.log(req, req.cookies)
-    if(req.body.token){
-        req.cookies = {loginToken: req.body.token}
-    }
-    next()
-    return
-}
+// const addTokenAsCookie = (req, res, next) =>{
+//     console.log(req, req.cookies)
+//     // if(req.body.token){
+//     //     req.cookies = {loginToken: req.body.token}
+//     // }
+//     next()
+//     return
+// }
 
 const indexRouter = require("./routes")
 
@@ -24,7 +24,7 @@ app.use(cors(corsOptions))
 app.use(express.json())
 app.use(cookieParser())
 app.use(morgan("dev"))
-app.use(addTokenAsCookie)
+// app.use(addTokenAsCookie)
 app.use(identifyUser)
 
 
