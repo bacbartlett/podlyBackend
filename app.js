@@ -18,11 +18,11 @@ const {identifyUser} = require("./identifyUser")
 const indexRouter = require("./routes")
 
 const app = express();
-
+app.use(cookieParser())
 const corsOptions = {origin: ["https://master.d2xwoaxs83rxad.amplifyapp.com", "http://localhost:3000"], credentials: true};
 app.use(cors(corsOptions))
 app.use(express.json())
-app.use(cookieParser())
+
 app.use(morgan("dev"))
 // app.use(addTokenAsCookie)
 app.use(identifyUser)
