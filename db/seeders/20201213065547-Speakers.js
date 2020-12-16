@@ -11,6 +11,11 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
     */
+   await queryInterface.bulkInsert("Speakers", [
+     {transcriptId: 1, name: "Narrator", createdAt: new Date(), updatedAt: new Date()},
+     {transcriptId: 1, name: "Ad Reader", createdAt: new Date(), updatedAt: new Date()},
+     {transcriptId: 1, name: "Outro Voice", createdAt: new Date(), updatedAt: new Date()},
+   ])
   },
 
   down: async (queryInterface, Sequelize) => {
@@ -20,5 +25,6 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
+    await queryInterface.bulkDelete("Speakers", null)
   }
 };

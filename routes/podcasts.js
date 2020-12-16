@@ -124,6 +124,7 @@ router.post("/:podcastId/newjob", async (req, res) =>{
     const podcastInfo = {mediaUrl, podcastId: req.params.podcastId, speakerNames}
     
     const transcript = await Transcript.create({status: 1, link: mediaUrl, podcastId: req.params.podcastId, title: title})
+    console.log(transcript)
     for(let i = 0; i < speakerNames.length; i++){
         const speaker = await Speaker.create({transcriptId: transcript.id, name: speakerNames[i]})
     }
