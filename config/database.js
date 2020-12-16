@@ -1,5 +1,5 @@
 const config = require(".");
-
+console.log(process.env.DATABASE_URL, "This is the database url")
 const db = config.db;
 const username = db.username;
 const password = db.password;
