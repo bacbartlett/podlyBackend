@@ -28,3 +28,4 @@ module.exports = {
     await queryInterface.bulkDelete("Researchers", null)
   }
 };
+ 
