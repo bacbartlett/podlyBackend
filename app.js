@@ -18,7 +18,7 @@ const indexRouter = require("./routes")
 
 const app = express();
 
-const corsOptions = {origin: "*"};
+const corsOptions = {origin: "*", credentials: true};
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use(cookieParser())
