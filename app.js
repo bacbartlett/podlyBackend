@@ -18,7 +18,7 @@ const indexRouter = require("./routes")
 
 const app = express();
 
-const corsOptions = {origin: "https://master.d2xwoaxs83rxad.amplifyapp.com/", credentials: true};
+const corsOptions = {origin: "https://master.d2xwoaxs83rxad.amplifyapp.com", credentials: true};
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use(cookieParser())
