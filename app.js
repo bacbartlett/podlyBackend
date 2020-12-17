@@ -16,6 +16,12 @@ const bearerToken = require("express-bearer-token")
 //     return
 // }
 
+const pullOutToken = (req,res, next) =>{
+    console.log(req.headers)
+    next()
+    return
+}
+
 const indexRouter = require("./routes")
 
 const app = express();
@@ -24,6 +30,7 @@ app.use(cookieParser())
 const corsOptions = {origin: ["https://master.d2xwoaxs83rxad.amplifyapp.com", "http://localhost:3000"], credentials: true};
 app.use(cors(corsOptions))
 app.use(express.json())
+app.use(pullOutToken)
 
 app.use(morgan("dev"))
 // app.use(addTokenAsCookie)

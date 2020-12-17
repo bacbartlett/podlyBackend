@@ -47,6 +47,8 @@ router.post("/login", async(req, res, next) =>{
     }
     const token = await generateNewToken(user.id, "Podcaster")
     // res.cookie("loginToken", token, {sameSite: "None", secure: true})
+    res.append("Set-Cookie", `loginToken=${token}; SameSite=None; Secure`)
+    console.log("Token being sent", token)
     res.json({email: user.email, id: user.id, token})
 })
 

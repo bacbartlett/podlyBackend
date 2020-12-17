@@ -4,15 +4,16 @@ const bearerToken = require("express-bearer-token");
 const secret = require("./config").jwtConfig.secret;
 const {Researcher, Transcriber, Podcaster} = require("./db/models")
 const identifyUser = async(req, res, next)=>{
-    console.log(req, "This is req")
-    console.log(req.headers.cookies, "This is the headers")
-    console.log(req.cookies, "THis is just plain cookies")
-    if(!req.token){
+    // console.log(req, "This is req")
+    // console.log(req.headers.cookies, "This is the headers")
+    // console.log(req.cookies, "THis is just plain cookies")
+    console.log(req.cookie, "I AM TOKEN")
+    if(!req.cookie){
         req.user = null;
         next()
         return
     }
-    const token = req.token;
+    const token = req.cookie;
     jwt.verify(token, secret, null, async (err, payload) =>{
         if(err || !payload){
             req.user = null
