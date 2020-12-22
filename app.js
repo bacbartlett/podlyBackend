@@ -7,17 +7,17 @@ const d = require("dotenv").config()
 const {identifyUser} = require("./identifyUser")
 const bearerToken = require("express-bearer-token")
 
-// const addTokenAsCookie = (req, res, next) =>{
-//     console.log(req, req.cookies)
-//     // if(req.body.token){
-//     //     req.cookies = {loginToken: req.body.token}
-//     // }
-//     next()
-//     return
-// }
-
 const pullOutToken = (req,res, next) =>{
-    console.log(req.headers)
+    if(req.headers.authorization){
+        const tokenProcessing = req.headers.authorization.split(" ")
+        const Bearer = tokenProcessing.shift()
+        if(Bearer !== "Bearer"){
+            next()
+            return
+        }
+        const token = tokenProcessing.join("")
+        req.cookie = token
+    }
     next()
     return
 }

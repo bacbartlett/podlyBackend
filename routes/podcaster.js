@@ -40,6 +40,7 @@ router.post("/login", async(req, res, next) =>{
         return
     }
     const {email, password} = req.body;
+    console.log(email, password, req.body)
     const user = await Podcaster.findOne({where: {email}})
     if(!user || !checkHashedPassword(password, user.hashedPassword)){
         res.json({msg: "Username or Password is incorrect"})
