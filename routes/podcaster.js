@@ -3,7 +3,7 @@ const {hashPassword, createCookie, generateNewToken} = require("../identifyUser"
 const {checkHashedPassword} = require("../identifyUser")
 
 const podcastRouter = require("./podcasts")
-const {Podcaster} = require("../db/models")
+const {Podcaster, Transcript, Podcast} = require("../db/models")
 
 const router = express.Router()
 
@@ -51,6 +51,27 @@ router.post("/login", async(req, res, next) =>{
     res.append("Set-Cookie", `loginToken=${token}; SameSite=None; Secure`)
     console.log("Token being sent", token)
     res.json({email: user.email, id: user.id, token})
+})
+
+router.post("/approveReject/:transcriptId", async (req, res, next)=>{
+    if(!req.user){
+        res.json({msg: "Please Log In"})
+        return
+    }
+    const transcript = await Transcript.findOne({where: {id: req.params.transcriptId}, include: {model: Podcast, include: {model: Podcaster}}})
+    if(!transcript || transcript.Podcast.Podcaster.id !== req.user.id){
+        res.json({msg: "An error occured"})
+        return
+    }
+    const {msg} = req.body
+    if(msg === "Approve"){
+        transcript.status = 4
+    } else if(msg === "Reject"){
+        transcript.status = 2
+    }
+    await transcript.save()
+    res.json({msg: "Success"})
+    return
 })
 
 

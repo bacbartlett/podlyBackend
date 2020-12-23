@@ -204,14 +204,24 @@ router.get("/pendingJobs", async(req,res,next)=>{
         res.json({msg: "Please Log In"})
         return
     }
-    const transcripts = Transcript.findAll({where: {status: 3}, include: {model: Podcast, include:{model:Podcaster}}})
-    const result = []
+    const transcripts = await Transcript.findAll({where: {status: 3}, include: [{model: Podcast, include:{model:Podcaster}}, {model: Speaker}]})
+    const results = []
     for(let i = 0; i < transcripts.length; i++){
+        console.log("FOUND ONE")
         if(transcripts[i].Podcast.Podcaster.id === req.user.id){
-            result.push(transcripts[i])
+            const result = {
+                title: transcripts[i].title,
+                image: transcripts[i].Podcast.photoUrl,
+                podcastTitle: transcripts[i].Podcast.name,
+                Speakers: transcripts[i].Speakers,
+                id: transcripts[i].id,
+                podcastName: transcripts[i].Podcast.name
+            }
+            results.push(result)
+            console.log("PUSHED IT")
         }
     }
-    res.json({results})
+    res.json(results)
 })
 
 

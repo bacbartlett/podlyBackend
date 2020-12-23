@@ -30,11 +30,11 @@ router.get("/:transcriptId", async(req, res, next) =>{
     if(transcript.status === 2 && req.user.type === "Transcriber"){
         validated = true;
     } else if(transcript.status === 3){
-        if(user.type === "Podcaster"){
+        if(req.user.type === "Podcaster"){
             if(transcript.Podcast.Podcaster.id === req.user.id){
                 validated = true
             }
-        } else if(user.type === "Transcriber"){
+        } else if(req.user.type === "Transcriber"){
             if(transcript.Transcriber === req.user.id){
                 validated = true
             }
