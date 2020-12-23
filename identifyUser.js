@@ -33,7 +33,7 @@ const identifyUser = async(req, res, next)=>{
         } catch(e){
             console.log(e)
         }
-        req.user = {id: user.id, email: user.email}
+        req.user = {id: user.id, email: user.email, type: userType}
         next()
         return
     })

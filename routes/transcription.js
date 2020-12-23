@@ -13,7 +13,7 @@ AWS.config.update({
 const s3 = new AWS.S3()
 
 
-const {Transcript, Transcriber, Podcast, Speaker} = require("../db/models")
+const {Transcript, Transcriber, Podcast, Speaker, Podcaster} = require("../db/models")
 
 
 
@@ -25,7 +25,27 @@ router.get("/:transcriptId", async(req, res, next) =>{
         return
     }
     console.log("I am looking for:", req.params.transcriptId)
-    const transcript = await Transcript.findOne({where: {id: req.params.transcriptId}, include: Speaker})
+    const transcript = await Transcript.findOne({where: {id: req.params.transcriptId}, include: [{model: Speaker}, {model: Podcast, include: {model: Podcaster}}, {model: Transcriber}]})
+    let validated = false;
+    if(transcript.status === 2 && user.type === "Transcriber"){
+        validated = true;
+    } else if(transcript.status === 3){
+        if(user.type === "Podcaster"){
+            if(transcript.Podcast.Podcaster.id === req.user.id){
+                validated = true
+            }
+        } else if(user.type === "Transcriber"){
+            if(transcript.Transcriber === req.user.id){
+                validated = true
+            }
+        }
+    } else if(transcript.status === 4){
+        validated = true
+    }
+    if(!validated){
+        res.json({msg: "This transcipt is still being processed"})
+        return
+    }
     const mediaUrl = transcript.dynamoUrl
     const Key = mediaUrl.split("/").pop()
     console.log("I AM FIRST KEY!!!!!!!!!!!!!!!", Key)
@@ -77,6 +97,7 @@ router.post("/:transcriptionId", async(req, res, next)=>{
     temp.push(uploadKey)
     transcript.dynamoUrl = temp.join("/")
     transcript.status = 3;
+    transcript.transcriberId = req.user.id
     transcript.save()
 
     res.json({msg: "Success"})
