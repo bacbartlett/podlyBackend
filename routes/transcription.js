@@ -27,7 +27,7 @@ router.get("/:transcriptId", async(req, res, next) =>{
     console.log("I am looking for:", req.params.transcriptId)
     const transcript = await Transcript.findOne({where: {id: req.params.transcriptId}, include: [{model: Speaker}, {model: Podcast, include: {model: Podcaster}}, {model: Transcriber}]})
     let validated = false;
-    if(transcript.status === 2 && user.type === "Transcriber"){
+    if(transcript.status === 2 && req.user.type === "Transcriber"){
         validated = true;
     } else if(transcript.status === 3){
         if(user.type === "Podcaster"){
