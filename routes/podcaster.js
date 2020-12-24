@@ -10,7 +10,6 @@ const router = express.Router()
 router.use("/podcasts", podcastRouter)
 
 router.get("/token", (req, res)=>{
-    console.log(req.user)
     if(!req.user){
         res.json({msg:"Token not autheticated"})
         return
