@@ -33,22 +33,26 @@ router.get("/allPodcasts/:pageNumber", asyncHandler(async(req,res, next)=>{
 
 router.get("/allEpisodes/:podcastId", asyncHandler(async (req, res, next) =>{
     const transcripts = await Transcript.findAll({where: {podcastId: req.params.podcastId, status: 4}, include: [{model: Podcast, include:{model:Podcaster}}, {model: Speaker}]})
+    if(!transcripts.length){
+        res.json({msg: "Nothing to display"})
+        return
+    }
+    console.log(transcripts)
     const results = []
     for(let i = 0; i < transcripts.length; i++){
         console.log("FOUND ONE")
-        if(transcripts[i].Podcast.Podcaster.id === req.user.id){
-            const result = {
-                title: transcripts[i].title,
-                image: transcripts[i].Podcast.photoUrl,
-                podcastTitle: transcripts[i].Podcast.name,
-                Speakers: transcripts[i].Speakers,
-                id: transcripts[i].id,
-                podcastName: transcripts[i].Podcast.name
-            }
-            results.push(result)
-            console.log("PUSHED IT")
+        const result = {
+            title: transcripts[i].title,
+            image: transcripts[i].Podcast.photoUrl,
+            podcastTitle: transcripts[i].Podcast.name,
+            Speakers: transcripts[i].Speakers,
+            id: transcripts[i].id,
+            podcastName: transcripts[i].Podcast.name
         }
+        results.push(result)
+        console.log("PUSHED IT")
     }
+    
     res.json(results)
 }))
 
@@ -58,6 +62,10 @@ router.get("/allNotes", asyncHandler(async(req,res,next)=>{
         return
     }
     const notes = await Note.findAll({where: {researchId: req.user.id}, include:{model: Transcript}});
+    if(!notes.length){
+        res.json({msg: "Nothing to display"})
+        return
+    }
     req.json({data: notes})
 }))
 

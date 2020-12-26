@@ -69,6 +69,10 @@ router.get("/openprojects", asyncHandler(async(req, res, next)=>{
         }
         data.push(result)
     }
+    if(!data.length){
+        res.json({msg: "Nothing to display"})
+        return
+    }
     res.json(data)
 }))
 

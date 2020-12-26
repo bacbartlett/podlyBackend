@@ -116,7 +116,7 @@ const checkIfDone = async (t, podcastInfo) => {
 
 // })
 
-router.post("/:podcastId/newjob", asyncHanlder(async (req, res, next) =>{
+router.post("/:podcastId/newjob", asyncHandler(async (req, res, next) =>{
     if(!req.user){
         res.json({msg:"Please Login"})
         return
@@ -190,7 +190,7 @@ router.post("/new",  asyncHandler(async(req, res, next)=>{
     res.json(podcasts)
 }))
 
-router.get("/myPodcasts", asyncHanlder(async(req, res, next)=>{
+router.get("/myPodcasts", asyncHandler(async(req, res, next)=>{
     if(!req.user){
         res.json({msg: "Please Log In"})
         return
@@ -221,6 +221,10 @@ router.get("/pendingJobs", asyncHandler(async(req,res,next)=>{
             results.push(result)
             console.log("PUSHED IT")
         }
+    }
+    if(!result.length){
+        res.json({msg: "Nothing to display"})
+        return
     }
     res.json(results)
 }))
@@ -262,6 +266,11 @@ router.get("/:podcastId", asyncHandler(async (req, res) =>{
         
 
         items.push(episode)
+    }
+
+    if(!items.length){
+        res.json({msg: "Nothing to display"})
+        return
     }
     res.json(items)
 }))

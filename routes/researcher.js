@@ -21,7 +21,7 @@ router.get("/token", (req, res)=>{
 })
 
 
-router.post("/signUp", asyncHanlder(async (req, res, next) =>{
+router.post("/signUp", asyncHandler(async (req, res, next) =>{
     if(req.user){
         res.json(req.user)
         return
