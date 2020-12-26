@@ -8,6 +8,7 @@ const fs = require("fs")
 const timers = require("timers")
 const {Podcast, Transcript, Speaker, Podcaster} = require("../db/models")
 const {Transcript: TranscriptClass} = require("../diffing/Classes")
+const asyncHandler = require("../asyncHandler")
 //const multer = require("multer")
 
 AWS.config.update({
@@ -115,7 +116,7 @@ const checkIfDone = async (t, podcastInfo) => {
 
 // })
 
-router.post("/:podcastId/newjob", async (req, res) =>{
+router.post("/:podcastId/newjob", asyncHanlder(async (req, res, next) =>{
     if(!req.user){
         res.json({msg:"Please Login"})
         return
@@ -172,9 +173,9 @@ router.post("/:podcastId/newjob", async (req, res) =>{
     console.log("started")
     console.log(t)
     checkIfDone({t, podcastInfo})
-})
+}))
 
-router.post("/new", async(req, res, next)=>{
+router.post("/new",  asyncHandler(async(req, res, next)=>{
     if(!req.user){
         res.json({msg: "Please log in"})
         return
@@ -187,9 +188,9 @@ router.post("/new", async(req, res, next)=>{
     const nPodcast = await Podcast.create({podcasterId: req.user.id, name: title, rssFeedUrl, photoUrl: photoUrl})
     const podcasts = await Podcast.findAll({where:{podcasterId: req.user.id}})
     res.json(podcasts)
-})
+}))
 
-router.get("/myPodcasts", async(req, res, next)=>{
+router.get("/myPodcasts", asyncHanlder(async(req, res, next)=>{
     if(!req.user){
         res.json({msg: "Please Log In"})
         return
@@ -197,9 +198,9 @@ router.get("/myPodcasts", async(req, res, next)=>{
     const podcasts = await Podcast.findAll({where:{podcasterId:req.user.id}})
     res.json({results: podcasts})
     return
-})
+}))
 
-router.get("/pendingJobs", async(req,res,next)=>{
+router.get("/pendingJobs", asyncHandler(async(req,res,next)=>{
     if(!req.user){
         res.json({msg: "Please Log In"})
         return
@@ -222,11 +223,11 @@ router.get("/pendingJobs", async(req,res,next)=>{
         }
     }
     res.json(results)
-})
+}))
 
 
 //check that it is their podcast
-router.get("/:podcastId", async (req, res) =>{
+router.get("/:podcastId", asyncHandler(async (req, res) =>{
     if(!req.user){
         res.json({msg: "Please Log In"})
         return
@@ -263,7 +264,7 @@ router.get("/:podcastId", async (req, res) =>{
         items.push(episode)
     }
     res.json(items)
-})
+}))
 
 
 

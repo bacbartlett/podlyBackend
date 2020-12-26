@@ -4,6 +4,7 @@ const {checkHashedPassword} = require("../identifyUser")
 
 const podcastRouter = require("./podcasts")
 const {Podcaster, Transcript, Podcast} = require("../db/models")
+const asyncHandler = require("../asyncHandler")
 
 const router = express.Router()
 
@@ -19,7 +20,7 @@ router.get("/token", (req, res)=>{
 })
 
 
-router.post("/signUp", async (req, res, next) =>{
+router.post("/signUp", asyncHandler(async (req, res, next) =>{
     if(req.user){
         res.json(req.user)
         return
@@ -31,9 +32,9 @@ router.post("/signUp", async (req, res, next) =>{
     const token = await generateNewToken(newPodcaster.id, "Podcaster")
     res.json({id: newPodcaster.id, email: newPodcaster.email, token})
     return
-})
+}))
 
-router.post("/login", async(req, res, next) =>{
+router.post("/login", asyncHandler(async(req, res, next) =>{
     if(req.user){
         res.json(req.user)
         return
@@ -50,9 +51,9 @@ router.post("/login", async(req, res, next) =>{
     res.append("Set-Cookie", `loginToken=${token}; SameSite=None; Secure`)
     console.log("Token being sent", token)
     res.json({email: user.email, id: user.id, token})
-})
+}))
 
-router.post("/approveReject/:transcriptId", async (req, res, next)=>{
+router.post("/approveReject/:transcriptId", asyncHandler(async (req, res, next)=>{
     if(!req.user){
         res.json({msg: "Please Log In"})
         return
@@ -71,7 +72,7 @@ router.post("/approveReject/:transcriptId", async (req, res, next)=>{
     await transcript.save()
     res.json({msg: "Success"})
     return
-})
+}))
 
 
 
