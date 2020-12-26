@@ -4,6 +4,7 @@ const {checkHashedPassword} = require("../identifyUser")
 
 const {Transcriber, Transcript, Podcast, Speaker} = require("../db/models")
 const transcriptRouter = require("./transcription")
+const asyncHandler = require("../asyncHandler")
 
 const router = express.Router()
 
@@ -20,7 +21,7 @@ router.get("/token", (req, res)=>{
 })
 
 
-router.post("/signUp", async (req, res, next) =>{
+router.post("/signUp", asyncHandler( async (req, res, next) =>{
     if(req.user){
         res.json(req.user)
         return
@@ -32,9 +33,9 @@ router.post("/signUp", async (req, res, next) =>{
     const token = await generateNewToken(newPodcaster.id, "Transcriber")
     res.json({id: newPodcaster.id, email: newPodcaster.email, token})
     return
-})
+}))
 
-router.post("/login", async(req, res, next) =>{
+router.post("/login", asyncHandler(async(req, res, next) =>{
     if(req.user){
         res.json(req.user)
         return
@@ -47,10 +48,10 @@ router.post("/login", async(req, res, next) =>{
     }
     const token = await generateNewToken(user.id, "Transcriber")
     res.json({email: user.email, id: user.id, token})
-})
+}))
 
 
-router.get("/openprojects", async(req, res, next)=>{
+router.get("/openprojects", asyncHandler(async(req, res, next)=>{
     if(!req.user){
         res.json({msg: "Please log in"})
         return
@@ -69,7 +70,7 @@ router.get("/openprojects", async(req, res, next)=>{
         data.push(result)
     }
     res.json(data)
-})
+}))
 
 
 

@@ -1,6 +1,7 @@
 const express = require("express")
 const {hashPassword, createCookie, generateNewToken} = require("../identifyUser")
 const {checkHashedPassword} = require("../identifyUser")
+const asyncHandler = require("../asyncHandler")
 
 const {Researcher} = require("../db/models")
 const researchingRouter = require("./researching")
@@ -20,7 +21,7 @@ router.get("/token", (req, res)=>{
 })
 
 
-router.post("/signUp", async (req, res, next) =>{
+router.post("/signUp", asyncHanlder(async (req, res, next) =>{
     if(req.user){
         res.json(req.user)
         return
@@ -32,9 +33,9 @@ router.post("/signUp", async (req, res, next) =>{
     const token = await generateNewToken(newPodcaster.id, "Researcher")
     res.json({id: newPodcaster.id, email: newPodcaster.email, token})
     return
-})
+}))
 
-router.post("/login", async(req, res, next) =>{
+router.post("/login", asyncHandler( async(req, res, next) =>{
     if(req.user){
         res.json(req.user)
         return
@@ -47,7 +48,7 @@ router.post("/login", async(req, res, next) =>{
     }
     const token = await generateNewToken(user.id, "Researcher")
     res.json({email: user.email, id: user.id, token})
-})
+}))
 
 
 

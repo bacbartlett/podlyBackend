@@ -1,5 +1,5 @@
 const express = require("express")
-const { result } = require("lodash")
+const asyncHandler = require("../asyncHandler")
 
 const {Transcript, Podcast, Researcher, Note, Speaker, Podcaster} = require("../db/models")
 
@@ -8,7 +8,7 @@ const router = express.Router()
 const resultsPerPage = 20
 
 
-router.get("/allTranscripts/:pageNumber", async(req,res, next)=>{
+router.get("/allTranscripts/:pageNumber", asyncHandler(async(req,res, next)=>{
     const transcripts = await Transcript.findAll({where: {status: 3}, include: {model: Speaker, Podcast}})
     const results = []
     for(let i = 0; i < resultsPerPage; i++){
@@ -17,9 +17,9 @@ router.get("/allTranscripts/:pageNumber", async(req,res, next)=>{
         }
     }
     res.json({results, totalPages: Math.ceil(transcripts.length / resultsPerPage)})
-})
+}))
 
-router.get("/allPodcasts/:pageNumber", async(req,res, next)=>{
+router.get("/allPodcasts/:pageNumber", asyncHandler(async(req,res, next)=>{
     const podcasts = await Podcast.findAll()
     const results = []
     for(let i = 0; i < resultsPerPage; i++){
@@ -29,9 +29,9 @@ router.get("/allPodcasts/:pageNumber", async(req,res, next)=>{
         }
     }
     res.json({results, totalPages: Math.ceil(podcasts.length / resultsPerPage)})
-})
+}))
 
-router.get("/allEpisodes/:podcastId", async (req, res, next) =>{
+router.get("/allEpisodes/:podcastId", asyncHandler(async (req, res, next) =>{
     const transcripts = await Transcript.findAll({where: {podcastId: req.params.podcastId, status: 4}, include: [{model: Podcast, include:{model:Podcaster}}, {model: Speaker}]})
     const results = []
     for(let i = 0; i < transcripts.length; i++){
@@ -50,16 +50,16 @@ router.get("/allEpisodes/:podcastId", async (req, res, next) =>{
         }
     }
     res.json(results)
-})
+}))
 
-router.get("/allNotes", async(req,res,next)=>{
+router.get("/allNotes", asyncHandler(async(req,res,next)=>{
     if(!req.user){
         res.json({msg: "Please Log in"})
         return
     }
     const notes = await Note.findAll({where: {researchId: req.user.id}, include:{model: Transcript}});
     req.json({data: notes})
-})
+}))
 
 
 module.exports = router
