@@ -3,6 +3,7 @@ const AWS = require("aws-sdk")
 const config = require("../config")
 const {Differ} = require("../diffing")
 const {Word} = require("../diffing/Classes")
+const asyncHandler = require("../asyncHandler")
 
 AWS.config.update({
     secretAccessKey: config.awsConfig.secretKey,
@@ -19,7 +20,7 @@ const {Transcript, Transcriber, Podcast, Speaker, Podcaster} = require("../db/mo
 
 const router = express.Router()
 
-router.get("/:transcriptId", async(req, res, next) =>{
+router.get("/:transcriptId", asyncHandler(async(req, res, next) =>{
     if(!req.user){
         res.json({msg: "Please log in"})
         return
@@ -58,9 +59,9 @@ router.get("/:transcriptId", async(req, res, next) =>{
     console.log(JSON.parse(json.Body).length)
 
     res.json({data, transcript})
-})
+}))
 
-router.post("/:transcriptionId", async(req, res, next)=>{
+router.post("/:transcriptionId", asyncHandler(async(req, res, next)=>{
     if(!req.user){
         res.json({msg: "Please log in"})
         return
@@ -104,7 +105,7 @@ router.post("/:transcriptionId", async(req, res, next)=>{
 
     // console.log(d.result)
 
-})
+}))
 
 
 
