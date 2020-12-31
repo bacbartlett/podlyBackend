@@ -7,8 +7,8 @@ const d = require("dotenv").config()
 const {identifyUser} = require("./identifyUser")
 const bearerToken = require("express-bearer-token")
 
-const pg = require('pg');
-pg.defaults.ssl = true;
+// const pg = require('pg');
+// pg.defaults.ssl = true;
 
 const pullOutToken = (req,res, next) =>{
     if(req.headers.authorization){
