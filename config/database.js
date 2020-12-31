@@ -21,7 +21,7 @@ module.exports = {
     dialect: 'postgres',
     "dialectOptions": {
       "ssl": true
-    }
+    },
     seederStorage: 'sequelize',
   }
 };
