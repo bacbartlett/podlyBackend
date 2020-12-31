@@ -26,8 +26,8 @@ router.post("/signUp", asyncHandler(async (req, res, next) =>{
         return
     }
     const {email, password, firstName, lastName} = req.body
-    console.log(password)
-    console.log(hashPassword(password))
+    //console.log(password)
+    //console.log(hashPassword(password))
     const newPodcaster = await Podcaster.create({email, firstName, lastName, hashedPassword: hashPassword(password)});
     const token = await generateNewToken(newPodcaster.id, "Podcaster")
     res.json({id: newPodcaster.id, email: newPodcaster.email, token})
@@ -40,7 +40,7 @@ router.post("/login", asyncHandler(async(req, res, next) =>{
         return
     }
     const {email, password} = req.body;
-    console.log(email, password, req.body)
+    //console.log(email, password, req.body)
     const user = await Podcaster.findOne({where: {email}})
     if(!user || !checkHashedPassword(password, user.hashedPassword)){
         res.json({msg: "Username or Password is incorrect"})
@@ -49,7 +49,7 @@ router.post("/login", asyncHandler(async(req, res, next) =>{
     const token = await generateNewToken(user.id, "Podcaster")
     // res.cookie("loginToken", token, {sameSite: "None", secure: true})
     res.append("Set-Cookie", `loginToken=${token}; SameSite=None; Secure`)
-    console.log("Token being sent", token)
+    //console.log("Token being sent", token)
     res.json({email: user.email, id: user.id, token})
 }))
 

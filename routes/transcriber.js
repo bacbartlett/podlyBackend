@@ -11,7 +11,7 @@ const router = express.Router()
 router.use("/transcription", transcriptRouter)
 
 router.get("/token", (req, res)=>{
-    console.log(req.user)
+    //console.log(req.user)
     if(!req.user){
         res.json({msg:"Token not autheticated"})
         return
@@ -27,8 +27,8 @@ router.post("/signUp", asyncHandler( async (req, res, next) =>{
         return
     }
     const {email, password, firstName, lastName} = req.body
-    console.log(password)
-    console.log(hashPassword(password))
+    //console.log(password)
+    //console.log(hashPassword(password))
     const newPodcaster = await Transcriber.create({email, firstName, lastName, hashedPassword: hashPassword(password)});
     const token = await generateNewToken(newPodcaster.id, "Transcriber")
     res.json({id: newPodcaster.id, email: newPodcaster.email, token})

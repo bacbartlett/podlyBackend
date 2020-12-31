@@ -26,16 +26,16 @@ const router = express.Router()
 const readyForEditor = async (id) =>{
     const transcript = await Transcript.findByPk(id)
     if(!transcript.dynamoUrl){
-        console.log("No url")
+        //console.log("No url")
     }
     const dynamoUrl = transcript.dynamoUrl 
     const Key = dynamoUrl.split("/").pop()
-    console.log(Key)
+    //console.log(Key)
     const json = await s3.getObject({
         Bucket: "wisjson",
         Key
     }).promise()
-    console.log("First download completed")
+    //console.log("First download completed")
     const data = JSON.parse(json.Body)
     const t = new TranscriptClass()
     t.constructFromAWSJson(data)
@@ -47,20 +47,21 @@ const readyForEditor = async (id) =>{
         Key: uploadKey
     }
     const res = await s3.putObject(params).promise()
-    console.log(res)
+    //console.log(res)
     const temp = transcript.dynamoUrl.split("/")
     temp.pop()
     temp.push(uploadKey)
     transcript.dynamoUrl = temp.join("/")
     transcript.status = 2;
     transcript.save()
+    console.log("new one saved")
 }
 
 const checkIfDone = async (t, podcastInfo) => {
-    console.log("here is my arg: ", t)
-    console.log("Checking status")
+    //console.log("here is my arg: ", t)
+    //console.log("Checking status")
     const status = await Transcribe.getTranscriptionJob({TranscriptionJobName: t.t.TranscriptionJob.TranscriptionJobName}).promise()
-    console.log(status)
+    //console.log(status)
     if(status.TranscriptionJob.TranscriptionJobStatus === "COMPLETED"){
         console.log("Done! Do next thing")
         const transcript = await Transcript.findByPk(t.podcastInfo.transcriptId)
@@ -125,13 +126,12 @@ router.post("/:podcastId/newjob", asyncHandler(async (req, res, next) =>{
     const podcastInfo = {mediaUrl, podcastId: req.params.podcastId, speakerNames}
     
     const transcript = await Transcript.create({status: 1, link: mediaUrl, podcastId: req.params.podcastId, title: title})
-    console.log(transcript)
     for(let i = 0; i < speakerNames.length; i++){
         const speaker = await Speaker.create({transcriptId: transcript.id, name: speakerNames[i]})
     }
-    console.log("This is the mediaurl:", mediaUrl, "and this is the body:", req.body)
+    //console.log("This is the mediaurl:", mediaUrl, "and this is the body:", req.body)
     podcastInfo.transcriptId = transcript.id
-    res.json({msg: "starting"})
+    res.json({msg: "starting", id: podcastInfo.transcriptId})
     
     console.log("Starting")
     const resp = await fetch(mediaUrl)
@@ -165,13 +165,13 @@ router.post("/:podcastId/newjob", asyncHandler(async (req, res, next) =>{
             ShowSpeakerLabels: true,
             ShowAlternatives: true,
             MaxAlternatives: 4,
-            MaxSpeakerLabels: podcastInfo.speakerNames.length + 1
+            MaxSpeakerLabels: 7
         }
     }
     console.log("About to start")
     const t = await Transcribe.startTranscriptionJob(transcriptionOptions).promise()
     console.log("started")
-    console.log(t)
+    //console.log(t)
     checkIfDone({t, podcastInfo})
 }))
 
@@ -184,7 +184,7 @@ router.post("/new",  asyncHandler(async(req, res, next)=>{
     const feed = await parser.parseURL(rssFeedUrl)
     const title = feed.title
     const photoUrl = feed.image.url
-    console.log(photoUrl)
+    //console.log(photoUrl)
     const nPodcast = await Podcast.create({podcasterId: req.user.id, name: title, rssFeedUrl, photoUrl: photoUrl})
     const podcasts = await Podcast.findAll({where:{podcasterId: req.user.id}})
     res.json(podcasts)
@@ -208,7 +208,7 @@ router.get("/pendingJobs", asyncHandler(async(req,res,next)=>{
     const transcripts = await Transcript.findAll({where: {status: 3}, include: [{model: Podcast, include:{model:Podcaster}}, {model: Speaker}]})
     const results = []
     for(let i = 0; i < transcripts.length; i++){
-        console.log("FOUND ONE")
+        //console.log("FOUND ONE")
         if(transcripts[i].Podcast.Podcaster.id === req.user.id){
             const result = {
                 title: transcripts[i].title,
@@ -219,10 +219,10 @@ router.get("/pendingJobs", asyncHandler(async(req,res,next)=>{
                 podcastName: transcripts[i].Podcast.name
             }
             results.push(result)
-            console.log("PUSHED IT")
+            //console.log("PUSHED IT")
         }
     }
-    if(!result.length){
+    if(!results.length){
         res.json({msg: "Nothing to display"})
         return
     }
@@ -246,7 +246,7 @@ router.get("/:podcastId", asyncHandler(async (req, res) =>{
     for(let i = 0; i < 20; i++){
         const item = feed.items[i]
         const transcript = await Transcript.findOne({where:{podcastId: req.params.podcastId, title: item.title}, include:{model: Speaker}})
-        console.log(transcript)
+        //console.log(transcript)
         const episode = {
             title: item.title,
             image: feed.image.url,

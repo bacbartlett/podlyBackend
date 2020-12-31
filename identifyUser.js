@@ -16,7 +16,7 @@ const identifyUser = async(req, res, next)=>{
             next()
             return
         }
-        console.log(err, payload)
+        //console.log(err, payload)
         const {userId, userType} = payload
         let user;
 
@@ -31,7 +31,7 @@ const identifyUser = async(req, res, next)=>{
                 user = await Podcaster.findByPk(userId)
             }
         } catch(e){
-            console.log(e)
+            //console.log(e)
         }
         req.user = {id: user.id, email: user.email, type: userType}
         next()
@@ -57,7 +57,7 @@ const hashPassword = (password) =>{
 }
 
 const checkHashedPassword = (password, hash) =>{
-    console.log(password, hash.toString())
+    //console.log(password, hash.toString())
     return bcrypt.compareSync(password, hash.toString())
 }
 

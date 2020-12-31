@@ -112,10 +112,10 @@ class Differ{
     findDiff(){
         while(this.currentNew < newArr.length){
             //if it is the case that they are the same
-            console.log(this.currentOld)
-            console.log(this.oldArr[this.currentOld].word, this.newArr[this.currentNew])
+            //console.log(this.currentOld)
+            //console.log(this.oldArr[this.currentOld].word, this.newArr[this.currentNew])
             if(this.oldArr[this.currentOld].plain === this.newArr[this.currentNew].plain){
-                console.log("ture")
+                //console.log("ture")
                 const w = new Word(this.oldArr[this.currentOld].startTime, this.oldArr[this.currentOld].endTime, this.newArr[this.currentNew].formatted, this.oldArr[this.currentOld].speaker)
                 this.result.push(w)
                 this.completedNew = this.currentNew;
@@ -134,10 +134,10 @@ class Differ{
         let searchIndex = this.currentOld + 1
         let matched = 0
         while(searchIndex < this.currentOld + this.searchBuffer && searchIndex < this.oldArr.length){
-            console.log("Comparing:", this.newArr[this.currentNew],this.oldArr[searchIndex].word)
+            //console.log("Comparing:", this.newArr[this.currentNew],this.oldArr[searchIndex].word)
             if(this.newArr[this.currentNew + matched].plain === this.oldArr[searchIndex].plain){
                 matched++
-                console.log(matched)
+                //console.log(matched)
                 if(matched >= this.simMarker){
                     const w = new Word(this.oldArr[this.currentOld].startTime, this.oldArr[this.currentOld].endTime, this.newArr[this.currentNew].formatted, this.oldArr[this.currentOld].speaker)
                     this.completedOld++
@@ -146,7 +146,7 @@ class Differ{
                     return
                 }  
             }else{
-                console.log("resetting")
+                //console.log("resetting")
                 matched = 0
             }
             searchIndex++

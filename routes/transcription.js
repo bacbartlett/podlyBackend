@@ -20,12 +20,30 @@ const {Transcript, Transcriber, Podcast, Speaker, Podcaster} = require("../db/mo
 
 const router = express.Router()
 
-router.get("/:transcriptId", asyncHandler(async(req, res, next) =>{
-    if(!req.user){
-        res.json({msg: "Please log in"})
+router.get("/:transcriptId/speakers", asyncHandler(async(req,res,next) =>{
+    const speakers = await Speaker.findAll({where:{transcriptId: req.params.transcriptId}})
+    return res.json({speakers: speakers})
+}))
+
+router.post("/:transcriptId/speakers", asyncHandler(async(req,res,next)=>{
+    if(!req.user || req.user.type === "Researcher"){
+        res.json({msg: "Not authorized"})
         return
     }
-    console.log("I am looking for:", req.params.transcriptId)
+    const speakers = await Speaker.findAll({where:{transcriptId: req.params.transcriptId}})
+    for(let i = 0; i < speakers.length; i++){
+        await speakers[i].destroy()
+    }
+    const newSpeakers = req.body.speakers
+    for(let i = 0; i < newSpeakers.length; i++){
+        await Speaker.create({name: newSpeakers[i], transcriptId: req.params.transcriptId})
+    }
+    res.json({msg: "Success"})
+    return
+}))
+
+router.get("/:transcriptId", asyncHandler(async(req, res, next) =>{
+    //console.log("I am looking for:", req.params.transcriptId)
     const transcript = await Transcript.findOne({where: {id: req.params.transcriptId}, include: [{model: Speaker}, {model: Podcast, include: {model: Podcaster}}, {model: Transcriber}]})
     let validated = false;
     if(transcript.status === 2 && req.user.type === "Transcriber"){
@@ -49,14 +67,14 @@ router.get("/:transcriptId", asyncHandler(async(req, res, next) =>{
     }
     const mediaUrl = transcript.dynamoUrl
     const Key = mediaUrl.split("/").pop()
-    console.log("I AM FIRST KEY!!!!!!!!!!!!!!!", Key)
+    //console.log("I AM FIRST KEY!!!!!!!!!!!!!!!", Key)
     const json = await s3.getObject({
         Bucket: "wisjson",
         Key
     }).promise()
     const data = JSON.parse(json.Body)
 
-    console.log(JSON.parse(json.Body).length)
+    //console.log(JSON.parse(json.Body).length)
 
     res.json({data, transcript})
 }))
@@ -67,7 +85,7 @@ router.post("/:transcriptionId", asyncHandler(async(req, res, next)=>{
         return
     }
     const {data} = req.body
-    console.log(data.length)
+    //console.log(data.length)
     const transcript = await Transcript.findOne({where: {id: req.params.transcriptionId}, include: Speaker})
     const Key = transcript.dynamoUrl.split("/").pop()
     const Bucket = "wisjson"
@@ -81,7 +99,7 @@ router.post("/:transcriptionId", asyncHandler(async(req, res, next)=>{
         const currentWord = data[i]
         properData.push(new Word(currentWord.startTime, currentWord.endTime, currentWord.formatted, currentWord.speaker))
     }
-    console.log(JSON.parse(prom.Body).length, properData.length)
+    //console.log(JSON.parse(prom.Body).length, properData.length)
     const d = new Differ(JSON.parse(prom.Body), properData)
 
     const buff = Buffer.from(JSON.stringify(d.result))
@@ -92,7 +110,7 @@ router.post("/:transcriptionId", asyncHandler(async(req, res, next)=>{
         Key: uploadKey
     }
     const res1 = await s3.putObject(params).promise()
-    console.log(res1)
+    //console.log(res1)
     const temp = transcript.dynamoUrl.split("/")
     temp.pop()
     temp.push(uploadKey)
@@ -103,7 +121,7 @@ router.post("/:transcriptionId", asyncHandler(async(req, res, next)=>{
 
     res.json({msg: "Success"})
 
-    // console.log(d.result)
+    // //console.log(d.result)
 
 }))
 

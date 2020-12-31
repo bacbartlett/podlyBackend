@@ -29,7 +29,7 @@ app.use(bearerToken())
 app.use(cookieParser())
 const corsOptions = {origin: ["https://master.d2xwoaxs83rxad.amplifyapp.com", "http://localhost:3000"], credentials: true};
 app.use(cors(corsOptions))
-app.use(express.json())
+app.use(express.json({limit: '200mb'}))
 app.use(pullOutToken)
 
 app.use(morgan("dev"))

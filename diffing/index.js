@@ -22,7 +22,7 @@ class Differ{
         while(this.currentNew < this.newArr.length){
             //if it is the case that they are the same
             if(this.currentNew === 13){
-                console.log(this.oldArr[this.currentOld].plain, this.newArr[this.currentNew].plain)
+                //console.log(this.oldArr[this.currentOld].plain, this.newArr[this.currentNew].plain)
             }
             if(this.oldArr[this.currentOld].plain === this.newArr[this.currentNew].plain){
                 const w = new Word(this.oldArr[this.currentOld].startTime, this.oldArr[this.currentOld].endTime, this.newArr[this.currentNew].formatted, this.newArr[this.currentOld].speaker)
@@ -54,8 +54,8 @@ class Differ{
                     return
                 }  
             }else{
-                console.log(this.newArr[this.currentNew + matched].plain, this.oldArr[searchIndex].plain)
-                // console.log("resetting")
+                //console.log(this.newArr[this.currentNew + matched].plain, this.oldArr[searchIndex].plain)
+                // //console.log("resetting")
                 matched = 0
             }
             searchIndex++
@@ -67,16 +67,16 @@ class Differ{
     }
 
     addBackTimeStamps(){
-        console.log("rinning add back time stamps")
+        //console.log("rinning add back time stamps")
         for(let i = 0; i < this.result.length; i++){
             const currentWord = this.result[i]
             if(currentWord.startTime){
                 continue
             }
-            //console.log("Found one:", this.result[i])
+            ////console.log("Found one:", this.result[i])
             let counter = 1
             let j = i + 1;
-            while(!this.result[j].startTime && j < this.result.length){
+            while(j < this.result.length && !this.result[j].startTime  ){
                 counter++
                 j++
             }
@@ -84,15 +84,15 @@ class Differ{
             if(j === this.result.length){
                 dividedTime = .3
             } else{
-                console.log(this.result[j].startTime, this.result[i - 1].endTime, counter, (this.result[j].startTime - this.result[i - 1].endTime) / (counter) )
+                //console.log(this.result[j].startTime, this.result[i - 1].endTime, counter, (this.result[j].startTime - this.result[i - 1].endTime) / (counter) )
                 dividedTime = (this.result[j].startTime - this.result[i - 1].endTime) / (counter)
             }
             for(let k = 0; k < counter; k++){
                 this.result[i + k - 1].startTime = this.result[i - 1].endTime + (k * counter)
                 this.result[i + k - 1].endTime = this.result[i - 1].endTime + ((k + 1) * counter)
-                console.log(this.result[i + k - 1])
+                //console.log(this.result[i + k - 1])
             }
-            //console.log("done for this one:", this.result[i])
+            ////console.log("done for this one:", this.result[i])
         }
     }
 }
