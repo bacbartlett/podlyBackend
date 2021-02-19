@@ -46,9 +46,10 @@ router.get("/:transcriptId", asyncHandler(async(req, res, next) =>{
     //console.log("I am looking for:", req.params.transcriptId)
     const transcript = await Transcript.findOne({where: {id: req.params.transcriptId}, include: [{model: Speaker}, {model: Podcast, include: {model: Podcaster}}, {model: Transcriber}]})
     let validated = false;
-    if(transcript.status === 2 && req.user.type === "Transcriber"){
-        validated = true;
-    } else if(transcript.status === 3){
+    if(transcript.status === 4){
+        validated = true
+    }
+    else if(transcript.status === 3){
         if(req.user.type === "Podcaster"){
             if(transcript.Podcast.Podcaster.id === req.user.id){
                 validated = true
@@ -58,8 +59,8 @@ router.get("/:transcriptId", asyncHandler(async(req, res, next) =>{
                 validated = true
             }
         }
-    } else if(transcript.status === 4){
-        validated = true
+    } else if(transcript.status === 2 && req.user.type === "Transcriber"){
+        validated = true;
     }
     if(!validated){
         res.json({msg: "This transcipt is still being processed"})
