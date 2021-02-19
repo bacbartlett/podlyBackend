@@ -13,7 +13,7 @@ console.log("code:", code)
 const masterDiv = document.createElement("div")
 
 const getTextAndInsert = async () => {
-    const res = await fetch("https://podlybackend2.herokuapp.com/" + code, {
+    const res = await fetch("https://podlybackend2.herokuapp.com/transcriber/transcription/" + code, {
         headers: {
             'Content-Type': 'application/json'
         }
