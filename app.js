@@ -26,12 +26,15 @@ const pullOutToken = (req,res, next) =>{
 }
 
 const indexRouter = require("./routes")
+const openTranscripts = require("./routes/openTranscripts")
 
 const app = express();
 app.use(express.static("public"))
 app.use(bearerToken())
 app.use(cookieParser())
-const corsOptions = {origin: ["https://master.d2xwoaxs83rxad.amplifyapp.com", "http://localhost:3000"], credentials: true};
+const corsOptions = {origin: ["https://master.d2xwoaxs83rxad.amplifyapp.com", "http://localhost:3000", "http://localhost:8070"], credentials: true};
+//!!!!!!!!
+
 app.use(cors(corsOptions))
 app.use(express.json({limit: '200mb'}))
 app.use(pullOutToken)
@@ -41,7 +44,7 @@ app.use(morgan("dev"))
 app.use(identifyUser)
 
 
-
+app.use("/openTranscripts", openTranscripts)
 app.use("/", indexRouter)
 const port = process.env.PORT || 5000;
 
